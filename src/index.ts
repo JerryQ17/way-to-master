@@ -17,9 +17,9 @@ async function readJson(request: Request): Promise<Record<string, unknown>> {
   return body as Record<string, unknown>
 }
 
-function errorResponse(error: unknown): Response {
+function errorResponse(error: unknown, message = "Authentication request failed"): Response {
   console.error(error)
-  return Response.json({ error: "Authentication request failed" }, { status: 400 })
+  return Response.json({ error: message }, { status: 400 })
 }
 
 export default {
@@ -41,7 +41,7 @@ export default {
       try {
         return await authenticationOptions(env.DB)
       } catch (error) {
-        return errorResponse(error)
+        return errorResponse(error, "Unable to start passkey sign-in")
       }
     }
     if (url.pathname === "/api/authentication/verify" && request.method === "POST") {
@@ -50,7 +50,7 @@ export default {
           response: (await readJson(request)).response as never,
         })
       } catch (error) {
-        return errorResponse(error)
+        return errorResponse(error, "Passkey verification failed")
       }
     }
 

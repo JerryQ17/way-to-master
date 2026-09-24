@@ -163,7 +163,9 @@ export async function registrationVerify(
 ): Promise<Response> {
   const challenge = readChallenge(body.response)
   const pending = await consumeChallenge(db, challenge, "registration")
-  if (!pending.userId || !pending.displayName) throw new Error("Invalid registration state")
+  if (!pending.displayName) throw new Error("Invalid registration state")
+  const userId = pending.userId
+  if (!userId) throw new Error("Invalid registration state")
   const verification = await verifyRegistrationResponse({
     response: body.response,
     expectedChallenge: challenge,
@@ -177,21 +179,21 @@ export async function registrationVerify(
   await db.batch([
     db
       .prepare("INSERT INTO users (id, display_name, created_at) VALUES (?, ?, ?)")
-      .bind(pending.userId, pending.displayName, now),
+      .bind(userId, pending.displayName, now),
     db
       .prepare(
         "INSERT INTO credentials (id, user_id, public_key, counter, transports, created_at) VALUES (?, ?, ?, ?, ?, ?)",
       )
       .bind(
         credential.id,
-        pending.userId,
+        userId,
         credential.publicKey,
         credential.counter,
         JSON.stringify(credential.transports ?? []),
         now,
       ),
   ])
-  const token = await createSession(db, pending.userId)
+  const token = await createSession(db, userId)
   return Response.json({ ok: true }, { headers: { "Set-Cookie": sessionCookie(token) } })
 }
 

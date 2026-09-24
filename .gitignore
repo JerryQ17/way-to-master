@@ -12,3 +12,7 @@ replit.nix
 .quartz/
 quartz/cli/tui/dist/
 .turbo/
+
+.wrangler/
+
+.vscode/

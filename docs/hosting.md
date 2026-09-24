@@ -15,6 +15,37 @@ However, if you'd like to publish your site to the world, you need a way to host
 > [!tip] Keeping plugins in sync
 > All hosting examples below use `npx quartz plugin install` to install plugins from the lockfile. If contributors may add plugins to `quartz.config.yaml` without updating the lockfile, add `npx quartz plugin install --from-config` after `install` in your build command to install any missing plugins. See [[cli/plugin#install|plugin install]] for details.
 
+## Cloudflare Worker authentication
+
+This repository's Worker protects all site requests with WebAuthn. The login page and authentication endpoints are public; `/api/health` is also public for health checks. The registration page and registration endpoints are available only while the `REGISTER_TOKEN` secret exists.
+
+1. Create a D1 database named `way-to-master`:
+
+```sh
+npx wrangler d1 create way-to-master
+```
+
+2. Copy the returned database ID into `wrangler.jsonc` as `database_id`.
+3. Apply the schema before the first deployment. The deploy command applies migrations first on every deployment:
+
+```sh
+npm run deploy
+```
+
+To initialize only a local database, run `npm run db:migrate:local`. 4. Enable registration by setting the secret. The value is never stored in the repository:
+
+```sh
+npx wrangler secret put REGISTER_TOKEN
+```
+
+5. Open `/register`, enter a display name and the token, and complete the passkey ceremony. The first passkey created is the user's first device. Repeat for the second user, then remove the registration capability:
+
+```sh
+npx wrangler secret delete REGISTER_TOKEN
+```
+
+When the secret is absent, `/register` and both registration API endpoints return `404`. Existing users add devices from an authenticated session through the device registration API; the registration token cannot be used for that flow. The configured WebAuthn origin is `https://way-to-master.workers.dev` and must be changed in `src/auth.ts` if the Worker moves to a custom domain.
+
 ## Cloudflare Pages
 
 1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com/) and select your account.

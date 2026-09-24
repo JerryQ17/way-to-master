@@ -17,6 +17,9 @@
     "check": "tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx --test",
+    "db:migrate:local": "wrangler d1 migrations apply way-to-master --local",
+    "db:migrate:remote": "wrangler d1 migrations apply way-to-master --remote",
+    "deploy": "npm run db:migrate:remote && wrangler deploy",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
     "install-plugins": "npx tsx ./quartz/plugins/loader/install-plugins.ts",
     "prebuild": "npm run install-plugins"
@@ -87,6 +90,7 @@
     "@quartz-community/unlisted-pages": "^1.0.0",
     "@quartz-themes/core": "^2.0.0",
     "@quartz-themes/default": "^1.0.1",
+    "@simplewebauthn/server": "^14.0.2",
     "ansi-truncate": "^1.4.0",
     "async-mutex": "^0.5.0",
     "chokidar": "^5.0.0",

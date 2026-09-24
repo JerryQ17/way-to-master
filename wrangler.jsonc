@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "way-to-master",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-09-23",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "way-to-master",
+      "migrations_dir": "migrations",
+    },
+  ],
+}

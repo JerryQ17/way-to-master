@@ -67,7 +67,12 @@ export default {
           return await registrationVerify(env.DB, { response: body.response as never })
         }
       } catch (error) {
-        return errorResponse(error)
+        return errorResponse(
+          error,
+          url.pathname.endsWith("/options")
+            ? "Unable to start registration"
+            : "Passkey registration failed",
+        )
       }
       return new Response("Method Not Allowed", { status: 405 })
     }

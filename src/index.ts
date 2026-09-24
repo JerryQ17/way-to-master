@@ -19,7 +19,8 @@ async function readJson(request: Request): Promise<Record<string, unknown>> {
 
 function errorResponse(error: unknown, message = "Authentication request failed"): Response {
   console.error(error)
-  return Response.json({ error: message }, { status: 400 })
+  const detail = error instanceof Error ? error.message : String(error)
+  return Response.json({ error: message, detail }, { status: 400 })
 }
 
 export default {

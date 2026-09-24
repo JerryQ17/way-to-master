@@ -14,6 +14,7 @@
     {
       "binding": "DB",
       "database_name": "way-to-master",
+      "database_id": "4ea6a78f-f831-4561-ac48-1a635270df39",
       "migrations_dir": "migrations",
     },
   ],

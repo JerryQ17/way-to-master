@@ -10,8 +10,8 @@ import type {
   WebAuthnCredential,
 } from "@simplewebauthn/server"
 
-const RP_ID = "way-to-master.workers.dev"
-const ORIGIN = "https://way-to-master.workers.dev"
+const RP_ID = "way-to-master.1397200108.workers.dev"
+const ORIGIN = "https://way-to-master.1397200108.workers.dev"
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30
 const CHALLENGE_TTL_SECONDS = 5 * 60
 

@@ -9,7 +9,7 @@ import {
   registrationOptions,
   registrationVerify,
 } from "./auth"
-import { loginPage, registrationPage } from "./pages"
+import { devicePage, loginPage, registrationPage } from "./pages"
 
 async function readJson(request: Request): Promise<Record<string, unknown>> {
   const body = await request.json()
@@ -56,8 +56,9 @@ export default {
     }
 
     if (url.pathname === "/api/register/options" || url.pathname === "/api/register/verify") {
-      if (!registrationEnabled(env) || !(await hasBearerToken(request, env.REGISTER_TOKEN ?? "")))
-        return new Response("Not Found", { status: 404 })
+      if (!registrationEnabled(env)) return new Response("Not Found", { status: 404 })
+      if (!(await hasBearerToken(request, env.REGISTER_TOKEN ?? "")))
+        return Response.json({ error: "Invalid registration token" }, { status: 401 })
       if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 })
       try {
         const body = await readJson(request)
@@ -93,6 +94,8 @@ export default {
         return errorResponse(error)
       }
     }
+
+    if (request.method === "GET" && url.pathname === "/devices") return devicePage()
 
     return env.ASSETS.fetch(request)
   },

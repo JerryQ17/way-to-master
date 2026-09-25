@@ -33,8 +33,10 @@ const clientScript = `
   const creationJSON = (options) => ({ ...options, challenge: fromBase64(options.challenge), user: { ...options.user, id: fromBase64(options.user.id) }, excludeCredentials: options.excludeCredentials?.map((item) => ({ ...item, id: fromBase64(item.id) })) });
   const call = async (path, options) => {
     const response = await fetch(path, options);
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error ?? 'Request failed');
+    const text = await response.text();
+    let body;
+    try { body = text ? JSON.parse(text) : {}; } catch { body = { error: text }; }
+    if (!response.ok) throw new Error(body.error ?? ('Request failed (' + response.status + ')'));
     return body;
   };
 `
@@ -67,6 +69,18 @@ export function registrationPage(): Response {
     `document.querySelector('#register').addEventListener('click', async () => {
       const button = document.querySelector('#register'); const status = document.querySelector('#status'); const token = document.querySelector('#token').value; button.disabled = true;
       try { const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }; const options = await call('/api/register/options', { method: 'POST', headers, body: JSON.stringify({ displayName: document.querySelector('#name').value }) }); const credential = await navigator.credentials.create({ publicKey: creationJSON(options) }); await call('/api/register/verify', { method: 'POST', headers, body: JSON.stringify({ response: credentialJSON(credential) }) }); location.href = '/'; }
+      catch (error) { status.textContent = error.message; button.disabled = false; }
+    });`,
+  )
+}
+
+export function devicePage(): Response {
+  return page(
+    "Add device",
+    `<h1>Add device</h1><p>Register a passkey on this computer.</p><button id="add">Add this computer</button><p role="status" id="status"></p>`,
+    `document.querySelector('#add').addEventListener('click', async () => {
+      const button = document.querySelector('#add'); const status = document.querySelector('#status'); button.disabled = true;
+      try { const options = await call('/api/devices/options', { method: 'POST' }); const credential = await navigator.credentials.create({ publicKey: creationJSON(options) }); await call('/api/devices/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ response: credentialJSON(credential) }) }); status.textContent = 'This computer has been added.'; }
       catch (error) { status.textContent = error.message; button.disabled = false; }
     });`,
   )
